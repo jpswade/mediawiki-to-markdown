@@ -83,11 +83,14 @@ while (list(, $node) = each($result)) {
 
     $text = str_replace('\_', '_', $text);
 
+    $revision = $node->xpath('revision/id');
+
     // prepare to append page title frontmatter to text.
     if ($add_meta) {
         $frontmatter = '---' . PHP_EOL;
         $frontmatter .= "title: $title" . PHP_EOL;
         $frontmatter .= "permalink: /$url/" . PHP_EOL;
+        $frontmatter .= "revision: $revision" . PHP_EOL;
         $frontmatter .= '---' . PHP_EOL . PHP_EOL;
         $text = $frontmatter . $text;
     }
