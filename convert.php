@@ -51,7 +51,7 @@ $directory_list = array();
 while (list(, $node) = each($result)) {
 
     $title = $node->xpath('title');
-    $title = $title[0];
+    $title = array_pop($title);
     $url = str_replace(' ', '_', $title);
 
     if ($slash = strpos($url, '/')) {
@@ -65,7 +65,7 @@ while (list(, $node) = each($result)) {
     }
 
     $text = $node->xpath('revision/text');
-    $text = $text[0];
+    $text = array_pop($text);
 
     // decode inline html.
     $text = html_entity_decode($text);
@@ -79,18 +79,19 @@ while (list(, $node) = each($result)) {
         'from' => 'mediawiki',
         'to' => $format
     );
-    $text = $pandoc->runWith($text, $options);
+    try {
+        $text = $pandoc->runWith($text, $options);
+    } catch (Exception $e) {
+        $text = $e->getMessage();
+    }
 
     $text = str_replace('\_', '_', $text);
-
-    $revision = $node->xpath('revision/id');
 
     // prepare to append page title frontmatter to text.
     if ($add_meta) {
         $frontmatter = '---' . PHP_EOL;
         $frontmatter .= "title: $title" . PHP_EOL;
         $frontmatter .= "permalink: /$url/" . PHP_EOL;
-        $frontmatter .= "revision: $revision" . PHP_EOL;
         $frontmatter .= '---' . PHP_EOL . PHP_EOL;
         $text = $frontmatter . $text;
     }
